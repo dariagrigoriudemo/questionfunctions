@@ -10,15 +10,23 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using Microsoft.Azure.Documents;
+using QuestionFunctions;
 
 namespace QuestionFunction
 {
-    public static class Question
+    public class Question
     {
         private const string FunctionQuestionSignal = "Meaning";
 
+        private readonly IQnAService _service;
+
+        public Question(IQnAService service)
+        {
+            _service = service;
+        }
+
         [FunctionName("Question")]
-        public static async Task<IActionResult> Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get","post", Route = null)] HttpRequest req,
             [CosmosDB(
                 databaseName: "questionsdb",
@@ -43,7 +51,7 @@ namespace QuestionFunction
                 : new BadRequestObjectResult("Please pass a name on the query string or in the request body");
         }
 
-        private static string getAnswer(string question, IEnumerable<QuestionDetail> documents) {
+        private async Task<string> getAnswer(string question, IEnumerable<QuestionDetail> documents) {
 
             if (question.Contains(FunctionQuestionSignal, StringComparison.InvariantCultureIgnoreCase))
             {
@@ -52,7 +60,8 @@ namespace QuestionFunction
                 return allDocuments[rnd.Next(allDocuments.Length)].answer_text;
             }
             else {
-                throw new NotImplementedException("Generic question answering not yet supported");
+                return await _service.GetResponse(question);
+                //throw new NotImplementedException("Generic question answering not yet supported");
             }
         }
     }
