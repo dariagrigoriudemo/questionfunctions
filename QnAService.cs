@@ -1,6 +1,4 @@
-﻿using Microsoft.Azure.CognitiveServices.Knowledge.QnAMaker;
-using Microsoft.Azure.CognitiveServices.Knowledge.QnAMaker.Models;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Net.Http;
 using System.Text;
@@ -10,8 +8,6 @@ namespace QuestionFunctions
 {
     public class QnAService : IQnAService
     {
-        //QnAMakerRuntimeClient _runtimeClient;
-
         public QnAService()
         {
             
@@ -52,7 +48,6 @@ namespace QuestionFunctions
                 {
                     return answer.answer;
                 }
-                
             }
             
             return "Not everything in life is black and white, I have not decided on an answer.";
