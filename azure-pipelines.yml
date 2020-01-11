@@ -33,10 +33,13 @@ stages:
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:
-        command: 'build'
-        projects: '**/*.csproj'
-        arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration Release
-
+        command: 'publish'
+        projects: '*.csproj'
+        arguments: --output publish_output --configuration Release
+        publishWebProjects: false
+        modifyOutputPath: true
+        zipAfterPublish: false
+    
     - task: ArchiveFiles@2
       displayName: 'Archive files'
       inputs:
