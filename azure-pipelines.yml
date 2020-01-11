@@ -35,7 +35,7 @@ stages:
       inputs:
         command: 'build'
         projects: |
-          '$(System.DefaultWorkingDirectory)/QuestionFunctions.csproj'
+          'QuestionFunctions.csproj'
         arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration Release
 
     - task: ArchiveFiles@2
