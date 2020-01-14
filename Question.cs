@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using Microsoft.Azure.Documents;
 using QuestionFunctions;
+using Microsoft.Azure.WebJobs.Extensions.SignalRService;
 
 namespace QuestionFunction
 {
@@ -34,6 +35,7 @@ namespace QuestionFunction
                 ConnectionStringSetting = "questionsDbConnectionString",
                 SqlQuery = "SELECT * FROM questions"
             )] IEnumerable<QuestionDetail> documents,
+            [SignalR(HubName = "questions")] IAsyncCollector<SignalRMessage> signalRMessages,
             ILogger log)
         {
 
@@ -46,6 +48,12 @@ namespace QuestionFunction
 
             if (question != null)
             {
+                await signalRMessages.AddAsync(new SignalRMessage
+                {
+                    Target = "newquestion",
+                    Arguments = new[] { question }
+                });
+
                 return new OkObjectResult(GetAnswer(question, documents));
             }
 
