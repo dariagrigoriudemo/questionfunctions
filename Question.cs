@@ -18,11 +18,11 @@ namespace QuestionFunction
     {
         private const string FunctionQuestionSignal = "Meaning";
 
-        private readonly IQnAService _service;
+        private readonly IQnAService _QnAService;
 
         public Question(IQnAService service)
         {
-            _service = service;
+            _QnAService = service;
         }
 
         [FunctionName("Question")]
@@ -36,19 +36,17 @@ namespace QuestionFunction
             )] IEnumerable<QuestionDetail> documents,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            log.LogInformation("C# HTTP triggered function processed a question request.");
 
             string question = req.Query["question"];
-
-            log.LogInformation(documents.Count().ToString());
-
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             question = question ?? data?.question;
 
             return question != null
                 ? (ActionResult)new OkObjectResult(getAnswer(question, documents))
-                : new BadRequestObjectResult("Please pass a name on the query string or in the request body");
+                : new BadRequestObjectResult("Please pass a question on the query string or in the request body");
         }
 
         private async Task<string> getAnswer(string question, IEnumerable<QuestionDetail> documents) {
@@ -60,8 +58,8 @@ namespace QuestionFunction
                 return allDocuments[rnd.Next(allDocuments.Length)].answer_text;
             }
             else {
-                return await _service.GetResponse(question);
-                //throw new NotImplementedException("Generic question answering not yet supported");
+                var answer = await _QnAService.GetResponse(question);
+                return answer;
             }
         }
     }
