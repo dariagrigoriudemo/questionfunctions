@@ -18,11 +18,11 @@ namespace QuestionFunction
     {
         private const string FunctionQuestionSignal = "Meaning";
 
-        private readonly IQnAService _QnAService;
+        private readonly IQnAService _answerService;
 
         public Question(IQnAService service)
         {
-            _QnAService = service;
+            _answerService = service;
         }
 
         [FunctionName("Question")]
@@ -44,12 +44,15 @@ namespace QuestionFunction
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             question = question ?? data?.question;
 
-            return question != null
-                ? (ActionResult)new OkObjectResult(getAnswer(question, documents))
-                : new BadRequestObjectResult("Please pass a question on the query string or in the request body");
+            if (question != null)
+            {
+                return new OkObjectResult(GetAnswer(question, documents));
+            }
+
+            return new BadRequestObjectResult("Please pass a question on the query string or in the request body");
         }
 
-        private async Task<string> getAnswer(string question, IEnumerable<QuestionDetail> documents) {
+        private async Task<string> GetAnswer(string question, IEnumerable<QuestionDetail> documents) {
 
             if (question.Contains(FunctionQuestionSignal, StringComparison.InvariantCultureIgnoreCase))
             {
@@ -58,7 +61,7 @@ namespace QuestionFunction
                 return allDocuments[rnd.Next(allDocuments.Length)].answer_text;
             }
             else {
-                var answer = await _QnAService.GetResponse(question);
+                var answer = await _answerService.GetResponse(question);
                 return answer;
             }
         }
